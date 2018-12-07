@@ -15,13 +15,13 @@ namespace AdventOfCode2018
 
     private static void Exercise1a()
     {
-      string output = File.ReadLines("1a.txt").Select(x => int.Parse(x)).Sum().ToString();
+      string output = File.ReadLines("1.txt").Select(x => int.Parse(x)).Sum().ToString();
       Console.WriteLine(output);
     }
 
     private static void Exercise1b()
     {
-      var input = File.ReadLines("1b.txt").Select(x => int.Parse(x)).ToArray();
+      var input = File.ReadLines("1.txt").Select(x => int.Parse(x)).ToArray();
       int sum = 0;
       HashSet<int> frequencies = new HashSet<int>() { sum };
 
