@@ -9,7 +9,7 @@ namespace AdventOfCode2018
   {
     private static void Main(string[] args)
     {
-      Exercise5b();
+      Exercise6a();
       Console.ReadLine();
     }
 
@@ -276,7 +276,32 @@ namespace AdventOfCode2018
 
     private static void Exercise6a()
     {
+      var inputs = File.ReadLines("6.txt").Select(x => 
+        x.Split(',').Select(y=>int.Parse(y)).ToList()
+      ).ToList();
 
+      int maxX = inputs.Select(x => x[0]).Max();
+      int maxY = inputs.Select(x => x[1]).Max();
+      int[,] map = new int[maxY,maxX];
+
+      int currentDist = 0;
+      foreach(var coords in inputs)
+      {
+        //Add all points
+        map[coords[1],coords[0]] = currentDist;
+
+        //Expand all points 1 distance at a time
+        //If point is taken, mark it with 0
+        //If all points are marked, break
+
+
+      }
+
+    }
+
+    private static int ManhDistance(int x1, int y1, int x2, int y2)
+    {
+      return Math.Abs(x1 - x2) + Math.Abs(y1 - y2);
     }
 
     private static void Exercise6b()
