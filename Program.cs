@@ -9,7 +9,7 @@ namespace AdventOfCode2018
   {
     private static void Main(string[] args)
     {
-      Exercise6a();
+      Exercise6b();
       Console.ReadLine();
     }
 
@@ -291,6 +291,7 @@ namespace AdventOfCode2018
         {
           int x = inputs[i][0], y = inputs[i][1];
 
+          // Mark the area arround the point at 1-distance increments
           for (int k = -currentDist; k <= currentDist; k++)
           {
             int y1 = y + (currentDist - Math.Abs(k));
@@ -305,9 +306,8 @@ namespace AdventOfCode2018
               else if (map[y1, x1][1] == currentDist)
                 map[y1, x1] = new int[] { -1, currentDist };
             }
-            if (y2 >= 0 && y2 < maxY && x1 >= 0 && x1 < maxX)
+            if (y2 >= 0 && y2 < maxY && x1 >= 0 && x1 < maxX && y1 != y2)
             {
-              if (map[y2, x1]?.First() == i) continue;
               if (map[y2, x1] == null)
                 map[y2, x1] = new int[] { i, currentDist };
               else if (map[y2, x1][1] == currentDist)
@@ -368,8 +368,44 @@ namespace AdventOfCode2018
 
     private static void Exercise6b()
     {
+      var inputs = File.ReadLines("6.txt").Select(x =>
+        x.Split(',').Select(y => int.Parse(y)).ToList()
+      ).ToList();
+
+      int maxX = inputs.Select(x => x[0]).Max() + 2;
+      int maxY = inputs.Select(x => x[1]).Max() + 2;
+      int[,] map = new int[maxY, maxX];
+
+      #region Fill map
+        for (int i = 0; i < inputs.Count; i++)
+        {
+          int x = inputs[i][0], y = inputs[i][1];
+          for (int currentDist = 0; currentDist <= maxX + maxY; currentDist++)
+          {
+            // Mark the area arround the point at 1-distance increments
+            for (int k = -currentDist; k <= currentDist; k++)
+            {
+              int y1 = y + (currentDist - Math.Abs(k));
+              int y2 = y - (currentDist - Math.Abs(k));
+              int x1 = x + k;
+
+              if (y1 >= 0 && y1 < maxY && x1 >= 0 && x1 < maxX)
+                map[y1, x1] += currentDist;
+              if (y2 >= 0 && y2 < maxY && x1 >= 0 && x1 < maxX && y1 != y2)
+                map[y2, x1] += currentDist;
+
+            }
+          }
+        }
+      
+      #endregion
+
+      var areaSize = map.Cast<int>().Where(x => x < 10000).Count();
+
+      Console.WriteLine($"{areaSize}");
 
     }
+
 
     //private static void Exercise5a()
     //{
