@@ -174,8 +174,8 @@ namespace AdventOfCode2018
       Dictionary<int, int[]> timesSleptPerMinute = new Dictionary<int, int[]>();
       int guard = -1;
       int startMinute = 0, endMinute = 0;
-      
-      foreach(var input in inputs)
+
+      foreach (var input in inputs)
       {
         if (input.EndsWith(" begins shift"))
           guard = int.Parse(input.Replace(" begins shift", "").Split('#').Last());
@@ -184,16 +184,16 @@ namespace AdventOfCode2018
         else if (input.EndsWith(" wakes up"))
         {
           endMinute = int.Parse(input.Substring(15, 2));
-          for(int i = startMinute; i < endMinute; i++)
+          for (int i = startMinute; i < endMinute; i++)
           {
-            if(!timesSleptPerMinute.ContainsKey(guard))
+            if (!timesSleptPerMinute.ContainsKey(guard))
               timesSleptPerMinute[guard] = new int[60];
             timesSleptPerMinute[guard][i]++;
           }
         }
       }
       int maxValue = timesSleptPerMinute.Select(x => x.Value.Sum()).Max();
-      int resultGuard = timesSleptPerMinute.ToDictionary(x => x.Key, x => x.Value.Sum()).Where(x=> x.Value == maxValue).Select(x=>x.Key).First();
+      int resultGuard = timesSleptPerMinute.ToDictionary(x => x.Key, x => x.Value.Sum()).Where(x => x.Value == maxValue).Select(x => x.Key).First();
       int minute = timesSleptPerMinute[resultGuard].ToList().IndexOf(timesSleptPerMinute[resultGuard].Max());
       Console.WriteLine(resultGuard * minute);
     }
@@ -230,13 +230,12 @@ namespace AdventOfCode2018
       Console.WriteLine(resultGuard * minute);
     }
 
-
     private static void Exercise5a()
     {
       string input = File.ReadAllText("5.txt");
       var data = input.ToList();
       int i = 0;
-      while(i < data.Count - 1)
+      while (i < data.Count - 1)
       {
         if (Math.Abs((int)data[i] - (int)data[i + 1]) == 32)
         {
@@ -276,29 +275,92 @@ namespace AdventOfCode2018
 
     private static void Exercise6a()
     {
-      var inputs = File.ReadLines("6.txt").Select(x => 
-        x.Split(',').Select(y=>int.Parse(y)).ToList()
+      var inputs = File.ReadLines("6.txt").Select(x =>
+        x.Split(',').Select(y => int.Parse(y)).ToList()
       ).ToList();
 
-      int maxX = inputs.Select(x => x[0]).Max();
-      int maxY = inputs.Select(x => x[1]).Max();
-      int[,] map = new int[maxY,maxX];
-
+      int maxX = inputs.Select(x => x[0]).Max() + 2;
+      int maxY = inputs.Select(x => x[1]).Max() + 2;
+      int[,][] map = new int[maxY, maxX][];
       int currentDist = 0;
-      foreach(var coords in inputs)
+
+      #region Fill map
+      while (map.Cast<int[]>().Any(x => x == null))
       {
-        //Add all points
-        map[coords[1],coords[0]] = currentDist;
+        for (int i = 0; i < inputs.Count; i++)
+        {
+          int x = inputs[i][0], y = inputs[i][1];
 
-        //Expand all points 1 distance at a time
-        //If point is taken, mark it with 0
-        //If all points are marked, break
+          for (int k = -currentDist; k <= currentDist; k++)
+          {
+            int y1 = y + (currentDist - Math.Abs(k));
+            int y2 = y - (currentDist - Math.Abs(k));
+            int x1 = x + k;
 
-
+            if (y1 >= 0 && y1 < maxY && x1 >= 0 && x1 < maxX)
+            {
+              if (map[y1, x1] == null) {
+                map[y1, x1] = new int[] { i, currentDist };
+              }
+              else if (map[y1, x1][1] == currentDist)
+                map[y1, x1] = new int[] { -1, currentDist };
+            }
+            if (y2 >= 0 && y2 < maxY && x1 >= 0 && x1 < maxX)
+            {
+              if (map[y2, x1]?.First() == i) continue;
+              if (map[y2, x1] == null)
+                map[y2, x1] = new int[] { i, currentDist };
+              else if (map[y2, x1][1] == currentDist)
+                map[y2, x1] = new int[] { -1, currentDist };
+            }
+          }
+          //PrintMap(map, maxY, maxX);
+        }
+        currentDist++;
       }
+      #endregion
+
+      #region Get all infinite spaces 
+      var infiniteSpaces = new HashSet<int>();
+      for (int x = 0; x < maxX; x++)
+      {
+        infiniteSpaces.Add(map[0, x][0]);
+        infiniteSpaces.Add(map[maxY - 1, x][0]);
+      }
+      for (int y = 0; y < maxY; y++)
+      {
+        infiniteSpaces.Add(map[y, 0][0]);
+        infiniteSpaces.Add(map[y, maxX - 1][0]);
+      }
+      #endregion
+
+      var maxArea = map.
+        Cast<int[]>().
+        Select(x => x.First()).
+        Where(x => !infiniteSpaces.Contains(x)).
+        GroupBy(x => x).
+        Select(gr => new { ID = gr.Key, Count = gr.Count() }).
+        OrderByDescending(gr => gr.Count).
+        First();
+
+      Console.WriteLine($"{maxArea.ID}:{maxArea.Count}");
 
     }
 
+    private static void PrintMap(int[,][] map, int maxY, int maxX)
+    {
+      Console.WriteLine("-----------------------------");
+      for (int y = 0; y < maxY; y++)
+      {
+        for (int x = 0; x < maxX; x++)
+        {
+          var v = map[y, x] == null ? "+": map[y, x][0] == -1 ? "." : map[y, x][0].ToString();
+          Console.Write(v);
+        }
+        Console.WriteLine();
+      }
+      Console.WriteLine("-----------------------------");
+    }
     private static int ManhDistance(int x1, int y1, int x2, int y2)
     {
       return Math.Abs(x1 - x2) + Math.Abs(y1 - y2);
