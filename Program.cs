@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace AdventOfCode2018
 {
@@ -9,10 +11,11 @@ namespace AdventOfCode2018
   {
     private static void Main(string[] args)
     {
-      Exercise6b();
+      Exercise7a();
       Console.ReadLine();
     }
 
+    #region Done
     private static void Exercise1a()
     {
       string output = File.ReadLines("1.txt").Select(x => int.Parse(x)).Sum().ToString();
@@ -361,10 +364,6 @@ namespace AdventOfCode2018
       }
       Console.WriteLine("-----------------------------");
     }
-    private static int ManhDistance(int x1, int y1, int x2, int y2)
-    {
-      return Math.Abs(x1 - x2) + Math.Abs(y1 - y2);
-    }
 
     private static void Exercise6b()
     {
@@ -393,7 +392,6 @@ namespace AdventOfCode2018
                 map[y1, x1] += currentDist;
               if (y2 >= 0 && y2 < maxY && x1 >= 0 && x1 < maxX && y1 != y2)
                 map[y2, x1] += currentDist;
-
             }
           }
         }
@@ -401,11 +399,47 @@ namespace AdventOfCode2018
       #endregion
 
       var areaSize = map.Cast<int>().Where(x => x < 10000).Count();
-
       Console.WriteLine($"{areaSize}");
+    }
+    #endregion
 
+    private static void Exercise7a()
+    {
+      var inputs = File.ReadLines("7.txt").Select(x =>
+        new char[] { x[5], x[36] }
+      ).ToList();
+      // Find start / end
+      var sources = inputs.Select(x => x[0]).Distinct();
+      var targets = inputs.Select(x => x[1]).Distinct();
+      var all = sources.Concat(targets).Distinct().Count();
+      var start = sources.Except(targets).ToList();
+      var end = targets.Except(sources).First();
+      List<char> sb = new List<char>();
+
+      var edges = inputs.GroupBy(x=>x[0]).ToDictionary(k=>k.Key, v => v.Select(x=>x[1]).OrderBy(x=>x).ToArray());
+      List<char> currentEdges = new List<char>(start);
+
+      while (true)
+      {
+        (currentEdges = currentEdges.Distinct().ToList()).Sort();
+        var currentTargets = edges.Values.SelectMany(x => x).GroupBy(x=>x).ToDictionary(k=>k.Key, v => v.Count());
+        var c = currentEdges.Where(x=> !currentTargets.ContainsKey(x)).First();
+
+        currentEdges.Remove(c);
+        if(!sb.Contains(c))
+          sb.Add(c);
+        if (c == end)
+          break;
+        currentEdges.AddRange(edges[c]);
+        edges.Remove(c);
+      }
+      Console.WriteLine(new string(sb.ToArray()));
     }
 
+    private static void Exercise7b()
+    {
+
+    }
 
     //private static void Exercise5a()
     //{
@@ -416,6 +450,7 @@ namespace AdventOfCode2018
     //{
 
     //}
+
     //using (WebClient client = new WebClient())
     //{
     //    string input = client.DownloadString("https://adventofcode.com/2018/day/1/input");
