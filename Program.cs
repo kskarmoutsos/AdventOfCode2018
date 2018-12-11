@@ -11,7 +11,7 @@ namespace AdventOfCode2018
   {
     private static void Main(string[] args)
     {
-      Exercise7a();
+      Exercise7b();
       Console.ReadLine();
     }
 
@@ -401,7 +401,6 @@ namespace AdventOfCode2018
       var areaSize = map.Cast<int>().Where(x => x < 10000).Count();
       Console.WriteLine($"{areaSize}");
     }
-    #endregion
 
     private static void Exercise7a()
     {
@@ -423,7 +422,7 @@ namespace AdventOfCode2018
       {
         (currentEdges = currentEdges.Distinct().ToList()).Sort();
         var currentTargets = edges.Values.SelectMany(x => x).GroupBy(x=>x).ToDictionary(k=>k.Key, v => v.Count());
-        var c = currentEdges.Where(x=> !currentTargets.ContainsKey(x)).First();
+        var c = currentEdges.First(x => !currentTargets.ContainsKey(x));
 
         currentEdges.Remove(c);
         if(!sb.Contains(c))
@@ -436,26 +435,111 @@ namespace AdventOfCode2018
       Console.WriteLine(new string(sb.ToArray()));
     }
 
+    #endregion
+
+
     private static void Exercise7b()
     {
+      var inputs = File.ReadLines("7.txt").Select(x =>
+        new char[] { x[5], x[36] }
+      ).ToList();
+      //time = int char -4
+      // Find start / end
+      var sources = inputs.Select(x => x[0]).Distinct();
+      var targets = inputs.Select(x => x[1]).Distinct();
+      var all = sources.Concat(targets).Distinct().Count();
+      var start = sources.Except(targets).ToList();
+      var end = targets.Except(sources).First();
+      List<char> sb = new List<char>();
 
+      var edges = inputs.GroupBy(x => x[0]).ToDictionary(k => k.Key, v => v.Select(x => x[1]).OrderBy(x => x).ToArray());
+      List<char> currentEdges = new List<char>(start);
+
+      var workers = new Worker[] { new Worker(), new Worker() , new Worker(), new Worker(), new Worker()
+      };
+
+      //foreach sec
+      //foreach worker
+
+      //foreach
+
+      for (int sec = 0; sec <= 3000; sec++)
+      {
+        foreach (var worker in workers)
+        {
+          // If the worker is free, add the task and remove from edges
+          // If the worker just finished the task, add to sb, add currentEdges, remove from edges
+          // If the worker is busy, continue
+          char? cc = worker.FinishTask(sec);
+          if (cc.HasValue)
+          {
+            char c = cc.Value;
+            if (!sb.Contains(c))
+              sb.Add(c);
+            if (c == end)
+              break;
+            currentEdges.AddRange(edges[c]);
+            (currentEdges = currentEdges.Distinct().ToList()).Sort();
+            edges.Remove(c);
+          }
+          if (!worker.IsBusy(sec))
+          {
+            var currentTargets = edges.Values.SelectMany(x => x).GroupBy(x => x).ToDictionary(k => k.Key, v => v.Count());
+            var c = currentEdges.FirstOrDefault(x => !currentTargets.ContainsKey(x));
+            if (c == default(char)) continue;
+            worker.AddTask(c, sec);
+            currentEdges.Remove(c);
+          }
+
+        }
+      }
+      Console.WriteLine(new string(sb.ToArray()));
     }
 
-    //private static void Exercise5a()
-    //{
+    //private static void Exercise5a() {}
+    //private static void Exercise5b() {}
 
-    //}
+  }
 
-    //private static void Exercise5b()
-    //{
+  class Worker
+  {
+    static int CurrentID;
 
-    //}
+    int ID { get; set; }
 
-    //using (WebClient client = new WebClient())
-    //{
-    //    string input = client.DownloadString("https://adventofcode.com/2018/day/1/input");
-    //    string output = input.Split(new string[] { Environment.NewLine }, StringSplitOptions.None).Select(x => int.Parse(x)).Sum().ToString();
-    //    Console.WriteLine(output);
-    //}
+    char? TaskChar { get; set; }
+
+    int BusyUntil { get; set; }
+
+    public bool IsBusy(int currentSec) {
+      return currentSec < BusyUntil;
+    }
+
+    public void AddTask(char task, int currentSec)
+    {
+      TaskChar = task;
+      BusyUntil = currentSec + (int) task - 4;
+      Console.WriteLine($"{ID} : Added task {task} and busy {currentSec}-{BusyUntil}");
+    }
+
+    public char? FinishTask(int currentSec)
+    {
+      //Console.WriteLine($"Finished task ?? at sec {currentSec}");
+      if (IsBusy(currentSec) || !TaskChar.HasValue)
+        return null;
+
+      var c = TaskChar;
+      TaskChar = null;
+      BusyUntil = 0;
+      Console.WriteLine($"{ID} : Finished task {c} at sec {currentSec}");
+
+      return c;
+    }
+
+
+    public Worker()
+    {
+      ID = CurrentID++;
+    }
   }
 }
