@@ -437,14 +437,11 @@ namespace AdventOfCode2018
 
     #endregion
 
-
+    // TODO: Wrong answer... Pfff
     private static void Exercise7b()
     {
-      var inputs = File.ReadLines("7.txt").Select(x =>
-        new char[] { x[5], x[36] }
-      ).ToList();
-      //time = int char -4
-      // Find start / end
+      var inputs = File.ReadLines("7.txt").Select(x => new char[] { x[5], x[36] }).ToList();
+
       var sources = inputs.Select(x => x[0]).Distinct();
       var targets = inputs.Select(x => x[1]).Distinct();
       var all = sources.Concat(targets).Distinct().Count();
@@ -455,13 +452,8 @@ namespace AdventOfCode2018
       var edges = inputs.GroupBy(x => x[0]).ToDictionary(k => k.Key, v => v.Select(x => x[1]).OrderBy(x => x).ToArray());
       List<char> currentEdges = new List<char>(start);
 
-      var workers = new Worker[] { new Worker(), new Worker() , new Worker(), new Worker(), new Worker()
+      var workers = new Worker[] { new Worker(), new Worker() , new Worker(), new Worker(), new Worker() 
       };
-
-      //foreach sec
-      //foreach worker
-
-      //foreach
 
       for (int sec = 0; sec <= 3000; sec++)
       {
@@ -490,56 +482,73 @@ namespace AdventOfCode2018
             worker.AddTask(c, sec);
             currentEdges.Remove(c);
           }
-
         }
+        Worker.PrintStatus(workers, sec, sb, currentEdges);
+        if (sb.Count == all) break;
       }
       Console.WriteLine(new string(sb.ToArray()));
     }
 
-    //private static void Exercise5a() {}
-    //private static void Exercise5b() {}
+    private static void Exercise8a()
+    {
 
+    }
+
+    private static void Exercise8b() { }
+
+    //private static void Exercise9a() {}
+    //private static void Exercise9b() {}
+
+    //private static void Exercise10a() {}
+    //private static void Exercise10b() {}
+
+    //private static void Exercise11a() {}
+    //private static void Exercise11b() {}
+
+    //private static void Exercise12a() {}
+    //private static void Exercise12b() {}
+
+    //private static void Exercise13a() {}
+    //private static void Exercise13b() {}
+
+    //private static void Exercise14a() {}
+    //private static void Exercise14b() {}
+
+    //private static void Exercise15a() {}
+    //private static void Exercise15b() {}
+
+    //private static void Exercise15a() {}
+    //private static void Exercise15b() {}
+
+    //private static void Exercise16a() {}
+    //private static void Exercise16b() {}
+
+    //private static void Exercise17a() {}
+    //private static void Exercise17b() {}
+
+    //private static void Exercise18a() {}
+    //private static void Exercise18b() {}
+
+    //private static void Exercise19a() {}
+    //private static void Exercise19b() {}
+
+    //private static void Exercise20a() {}
+    //private static void Exercise20b() {}
+
+    //private static void Exercise21a() {}
+    //private static void Exercise21b() {}
+
+    //private static void Exercise22a() {}
+    //private static void Exercise22b() {}
+
+    //private static void Exercise23a() {}
+    //private static void Exercise23b() {}
+
+    //private static void Exercise24a() {}
+    //private static void Exercise24b() {}
+
+    //private static void Exercise25a() {}
+    //private static void Exercise25b() {}
   }
 
-  class Worker
-  {
-    static int CurrentID;
-
-    int ID { get; set; }
-
-    char? TaskChar { get; set; }
-
-    int BusyUntil { get; set; }
-
-    public bool IsBusy(int currentSec) {
-      return currentSec < BusyUntil;
-    }
-
-    public void AddTask(char task, int currentSec)
-    {
-      TaskChar = task;
-      BusyUntil = currentSec + (int) task - 4;
-      Console.WriteLine($"{ID} : Added task {task} and busy {currentSec}-{BusyUntil}");
-    }
-
-    public char? FinishTask(int currentSec)
-    {
-      //Console.WriteLine($"Finished task ?? at sec {currentSec}");
-      if (IsBusy(currentSec) || !TaskChar.HasValue)
-        return null;
-
-      var c = TaskChar;
-      TaskChar = null;
-      BusyUntil = 0;
-      Console.WriteLine($"{ID} : Finished task {c} at sec {currentSec}");
-
-      return c;
-    }
-
-
-    public Worker()
-    {
-      ID = CurrentID++;
-    }
-  }
 }
