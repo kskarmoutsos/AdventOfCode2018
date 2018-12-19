@@ -11,7 +11,7 @@ namespace AdventOfCode2018
   {
     private static void Main(string[] args)
     {
-      Exercise7b();
+      Exercise8a();
       Console.ReadLine();
     }
 
@@ -491,7 +491,43 @@ namespace AdventOfCode2018
 
     private static void Exercise8a()
     {
+      var inputs = File.ReadAllText("8.txt").Split(' ').Select(x => int.Parse(x)).ToList();
 
+      int idx = 2;
+      var result = ParseLevel(inputs, inputs[0], inputs[1], ref idx).Sum();
+      Console.WriteLine(result);
+
+    }
+
+    private static List<int> ParseLevel(List<int> tree, int nodes, int meta, ref int idx)
+    {
+      List<int> result = new List<int>();
+      int[] ms = new int[nodes];
+
+      for(int i = 0; i < nodes; i++)
+      {
+        int n = tree[idx];
+        int m = tree[idx + 1];
+        idx += 2;
+        if (n > 0)
+        {
+          var data = ParseLevel(tree, n, m, ref idx);
+          result.AddRange(data);
+        }
+
+        if(n == 0)
+        {
+          var data = tree.GetRange(idx, m);
+          idx += m;
+          result.AddRange(data);
+          Console.WriteLine(string.Join(" ", data));
+        }
+      }
+      var d = tree.GetRange(idx, meta);
+      idx += meta;
+      result.AddRange(d);
+
+      return result;
     }
 
     private static void Exercise8b() { }
